@@ -63,8 +63,16 @@ class csv2mysql(object):
     self.csvreader = csv.reader(self.csvfile, self.dialect)
     self.headers = self.csvreader.next()
     self.headers = [header.split(':')[0] for header in self.headers]
-    self.types = dict([(header,'INT(11)') for header in self.headers])
+    self.types = dict([(header,'BIGINT') for header in self.headers])
   
+  def isFloat(self, x):
+    try:
+      f = float(x)
+      f= True
+    except ValueError:
+      f = False
+    return f
+
   def isInteger(self, x):
     if x == '' or x == None:
       return True
@@ -79,8 +87,11 @@ class csv2mysql(object):
       i = 0
       for header in self.headers:
         col = row[i]
-        if self.types[header] == 'INT(11)':
+        if self.types[header] == 'BIGINT':
           if self.isInteger(col) == False:
+            self.types[header] = 'DOUBLE'
+        if self.types[header] == 'DOUBLE':
+          if self.isFloat(col) == False:
             self.types[header] = 'VARCHAR(255)'
         i += 1
   
